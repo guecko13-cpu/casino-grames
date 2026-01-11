@@ -2,14 +2,12 @@
 set -eu
 
 source /usr/share/yunohost/helpers
-
-app=$YNH_APP_INSTANCE_NAME
-
-install_dir=$(ynh_app_setting_get --app="$app" --key=install_dir)
-port=$(ynh_app_setting_get --app="$app" --key=port)
+source ./scripts/_common.sh
 
 ynh_script_progression --message="Installation des sources..." --weight=5
 ynh_setup_source --dest_dir="$install_dir"
+
+ensure_dirs
 
 ynh_script_progression --message="Installation de MongoDB..." --weight=5
 ynh_install_mongo
@@ -17,25 +15,25 @@ ynh_install_mongo
 mongo_pwd=$(ynh_string_random --length=20)
 ynh_app_setting_set --app="$app" --key=mongo_pwd --value="$mongo_pwd"
 
-ynh_mongo_setup_db --db_user="$app" --db_name="$app" --db_pwd="$mongo_pwd"
-
-mongo_uri="mongodb://$app:$mongo_pwd@127.0.0.1:27017/$app"
 jwt_secret=$(ynh_string_random --length=32)
 ynh_app_setting_set --app="$app" --key=jwt_secret --value="$jwt_secret"
 
-yh_nlp=$(cat <<EOT
+cat <<EOT > "$install_dir/.env"
 PORT=$port
-MONGO_URI=$mongo_uri
+MONGO_URI=mongodb://$app:$mongo_pwd@127.0.0.1:27017/$app
 JWT_SECRET=$jwt_secret
 BCRYPT_ROUNDS=10
 DEFAULT_BALANCE=1000
 EOT
-)
 
-echo "$yh_nlp" > "$install_dir/.env"
+ynh_mongo_setup_db --db_user="$app" --db_name="$app" --db_pwd="$mongo_pwd"
 
 ynh_script_progression --message="Installation des dépendances Node.js..." --weight=10
-ynh_exec_as "$app" --env "PATH=$PATH_WITH_NODEJS:$PATH" --cwd "$install_dir" npm install --omit=dev
+install_node_deps
+
+ynh_script_progression --message="Construction des interfaces..." --weight=10
+build_frontend
+build_admin
 
 ynh_script_progression --message="Configuration de Nginx..." --weight=5
 ynh_config_add_nginx

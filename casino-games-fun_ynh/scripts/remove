@@ -2,8 +2,7 @@
 set -eu
 
 source /usr/share/yunohost/helpers
-
-app=$YNH_APP_INSTANCE_NAME
+source ./scripts/_common.sh
 
 ynh_script_progression --message="Suppression du service systemd..." --weight=5
 ynh_remove_systemd

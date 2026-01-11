@@ -1,6 +1,6 @@
 # Casino Games Fun
 
-Version "argent fictif" de la plateforme casino, sans crypto.
+Version "argent fictif" de la plateforme casino.
 
 ## Démarrage rapide
 1. Installer Node.js 20+ et MongoDB.

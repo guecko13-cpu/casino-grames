@@ -1,4 +1,5 @@
 packaging_format = 2
+helpers_version = 2.1
 id = "casino-games-fun"
 name = "Casino Games Fun"
 description.en = "Casino games with fictitious currency."
@@ -9,12 +10,12 @@ maintainers = ["devcarron"]
 [upstream]
 license = "MIT"
 website = "https://example.com"
-code = "https://github.com/devcarron/casino-games-web3"
+code = "https://github.com/devcarron/casino-games-fun"
 
 [resources]
   [resources.sources]
     [resources.sources.main]
-    url = "https://github.com/devcarron/casino-games-web3/archive/refs/heads/main.tar.gz"
+    url = "https://github.com/devcarron/casino-games-fun/archive/refs/heads/main.tar.gz"
     sha256 = "CHANGE_ME"
 
   [resources.system_user]
