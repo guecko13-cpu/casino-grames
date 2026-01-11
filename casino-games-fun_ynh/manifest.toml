@@ -1,0 +1,44 @@
+packaging_format = 2
+id = "casino-games-fun"
+name = "Casino Games Fun"
+description.en = "Casino games with fictitious currency."
+description.fr = "Jeux de casino avec monnaie fictive."
+version = "1.0.0"
+maintainers = ["devcarron"]
+
+[upstream]
+license = "MIT"
+website = "https://example.com"
+code = "https://github.com/devcarron/casino-games-web3"
+
+[resources]
+  [resources.sources]
+    [resources.sources.main]
+    url = "https://github.com/devcarron/casino-games-web3/archive/refs/heads/main.tar.gz"
+    sha256 = "CHANGE_ME"
+
+  [resources.system_user]
+
+  [resources.install_dir]
+
+  [resources.data_dir]
+
+  [resources.permissions]
+    [resources.permissions.main]
+    url = "/"
+    show_tile = true
+    protected = false
+
+    [resources.permissions.admin]
+    url = "/admin"
+    show_tile = false
+    protected = true
+
+  [resources.ports]
+    [resources.ports.main]
+
+  [resources.nodejs]
+    version = "20"
+
+  [resources.apt]
+    packages = ["build-essential", "python3"]
