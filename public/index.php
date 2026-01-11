@@ -230,20 +230,23 @@ switch ($path) {
     case '/lobby':
         respond_html(
             'Lobby',
-            '<section class="hero"><h1>Lobby</h1><p>Choisissez un jeu pour gagner des crédits fictifs.</p></section>
+            '<section class="page-header"><h1>Lobby</h1><p class="subtitle">Choisissez un jeu pour gagner des crédits fictifs.</p></section>
             <section class="grid cols-3">
-              <article class="card"><h3>Slots Nova</h3><p class="muted">Rapide et coloré.</p><span class="badge">Mise mini: 5 crédits</span></article>
-              <article class="card"><h3>Roulette Aurora</h3><p class="muted">Classique et fluide.</p><span class="badge">Mise mini: 10 crédits</span></article>
-              <article class="card"><h3>Blackjack Zenith</h3><p class="muted">Stratégie rapide.</p><span class="badge">Mise mini: 20 crédits</span></article>
-            </section>'
+              <article class="card game"><h3>Slots Nova</h3><p class="muted">Rapide et coloré.</p><div class="card-meta"><span class="badge">Volatilité: Moyenne</span><span class="badge">Mise mini: 5 crédits</span></div><div class="card-footer"><span class="helper">RTP 96%</span><button class="button secondary" type="button">Jouer</button></div></article>
+              <article class="card game"><h3>Roulette Aurora</h3><p class="muted">Classique et fluide.</p><div class="card-meta"><span class="badge">Risque: Faible</span><span class="badge">Mise mini: 10 crédits</span></div><div class="card-footer"><span class="helper">Table 5-200</span><button class="button secondary" type="button">Jouer</button></div></article>
+              <article class="card game"><h3>Blackjack Zenith</h3><p class="muted">Stratégie rapide.</p><div class="card-meta"><span class="badge">Risque: Moyen</span><span class="badge">Mise mini: 20 crédits</span></div><div class="card-footer"><span class="helper">3 decks</span><button class="button secondary" type="button">Jouer</button></div></article>
+            </section>
+            <section class="modal" aria-live="polite"><div class="modal-header"><strong>Placer une mise</strong><span class="badge">Crédits</span></div><div class="modal-body"><label class="helper" for="bet-input">Montant</label><input id="bet-input" class="input" type="number" min="5" max="500" value="20"><button class="button" type="button">Confirmer</button></div></section>
+            <div class="toast" role="status" aria-live="polite"><span class="badge success">Succès</span> Bonus quotidien disponible</div>'
         );
         break;
     case '/profile':
         respond_html(
             'Profil',
-            '<section class="grid cols-2">
+            '<section class="page-header"><h1>Profil</h1><p class="subtitle">Vos infos et préférences.</p></section>
+            <section class="grid cols-2">
               <article class="card"><h3>Profil joueur</h3><p class="muted">Pseudo, niveau et statistiques.</p><div class="list"><div class="list-item"><span>Pseudo</span><strong>Guest</strong></div><div class="list-item"><span>Niveau</span><strong>1</strong></div><div class="list-item"><span>Succès</span><strong>0</strong></div></div></article>
-              <article class="card"><h3>Préférences</h3><p class="muted">Gérez votre session.</p><form method="post" action="/logout"><input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token(), ENT_QUOTES) . '"><button class="button secondary" type="submit">Déconnexion</button></form></article>
+              <article class="card stack"><h3>Préférences</h3><p class="muted">Gérez votre session.</p><div class="skeleton" style="height: 20px;"></div><div class="skeleton" style="height: 12px; width: 60%;"></div><form method="post" action="/logout"><input type="hidden" name="csrf_token" value="' . htmlspecialchars(csrf_token(), ENT_QUOTES) . '"><button class="button secondary" type="submit">Déconnexion</button></form></article>
             </section>'
         );
         break;
@@ -262,9 +265,10 @@ switch ($path) {
         }
         respond_html(
             'Crédits',
-            '<section class="grid cols-2">
+            '<section class="page-header"><h1>Crédits</h1><p class="subtitle">Gérez votre solde et vos bonus.</p></section>
+            <section class="grid cols-2">
               <article class="card"><h3>Solde</h3><p class="muted">Crédits disponibles</p><h2>' . $balance . ' crédits</h2><div class="status success">Solde actif</div></article>
-              <article class="card"><h3>Bonus quotidien</h3><p class="muted">Ajoutez des crédits gratuits.</p><button class="button">Réclamer 100 crédits</button><p class="muted">Via <code>/api/bonus/daily</code></p></article>
+              <article class="card stack"><h3>Bonus quotidien</h3><p class="muted">Ajoutez des crédits gratuits.</p><button class="button">Réclamer 100 crédits</button><p class="helper">Via <code>/api/bonus/daily</code></p></article>
             </section>
             <section class="card"><h3>Dernières transactions</h3><div class="list">' . $txList . '</div></section>'
         );
@@ -272,7 +276,8 @@ switch ($path) {
     case '/history':
         respond_html(
             'Historique',
-            '<section class="card"><h3>Historique des crédits</h3><p class="muted">Toutes les opérations internes.</p><div class="list">
+            '<section class="page-header"><h1>Historique</h1><p class="subtitle">Toutes les opérations internes.</p></section>
+            <section class="card"><h3>Historique des crédits</h3><div class="list">
               <div class="list-item"><span>Bonus quotidien</span><span class="badge success">+100</span></div>
               <div class="list-item"><span>Mise blackjack</span><span class="badge error">-20</span></div>
               <div class="list-item"><span>Gain roulette</span><span class="badge success">+45</span></div>

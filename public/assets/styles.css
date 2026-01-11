@@ -115,6 +115,25 @@ a {
   gap: var(--space-6);
 }
 
+.page-header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+.stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
 .hero {
   background: linear-gradient(135deg, var(--primary), #8a8dff);
   color: white;
@@ -148,6 +167,28 @@ a {
   border: 1px solid var(--border);
   padding: var(--space-5);
   box-shadow: var(--shadow);
+}
+
+.card.game {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.card.game h3 {
+  margin: 0;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
 }
 
 .card h3 {
@@ -209,6 +250,11 @@ a {
   color: inherit;
 }
 
+.helper {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 .list {
   display: grid;
   gap: var(--space-3);
@@ -233,6 +279,74 @@ a {
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--border);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.modal-body {
+  margin-top: var(--space-3);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.toast {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow);
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  min-height: 14px;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  .skeleton::after {
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .status {
