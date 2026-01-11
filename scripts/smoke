@@ -1,0 +1,16 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+
+app=$YNH_APP_INSTANCE_NAME
+
+domain=$(ynh_app_setting_get --app="$app" --key=domain)
+path=$(ynh_app_setting_get --app="$app" --key=path)
+
+base_url="https://$domain$path"
+
+curl -fsS "$base_url/api/health" >/dev/null
+curl -fsS "$base_url/admin/" >/dev/null
+
+echo "Smoke test OK"

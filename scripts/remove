@@ -1,0 +1,18 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+ynh_script_progression --message="Suppression du service systemd..." --weight=5
+ynh_remove_systemd
+
+ynh_script_progression --message="Suppression de la configuration Nginx..." --weight=5
+ynh_remove_nginx
+
+if ynh_app_setting_get --app="$app" --key=mongo_pwd >/dev/null 2>&1; then
+  ynh_script_progression --message="Suppression de la base MongoDB..." --weight=5
+  ynh_mongo_remove_db --db_user="$app" --db_name="$app"
+fi
+
+ynh_script_progression --message="Suppression terminée." --last

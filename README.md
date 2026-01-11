@@ -1,28 +1,22 @@
-# Casino Games Fun
+# Casino Games Fun (YunoHost package)
 
-Version "argent fictif" de la plateforme casino.
+Package YunoHost v2.1 pour installer la version "argent fictif" via le panel.
 
-## Démarrage rapide
-1. Installer Node.js 20+ et MongoDB.
-2. Copier `.env.example` vers `.env` et ajuster les valeurs.
-3. Installer les dépendances puis lancer :
-   ```bash
-   npm install
-   npm run start
+## Installation via le panel
+1. YunoHost → Applications → Installer une application personnalisée.
+2. URL Git du package :
    ```
-4. Ouvrir `http://localhost:3000` (frontend) ou `http://localhost:3000/admin`.
+   https://github.com/guecko13-cpu/casino-grames.git#ynh
+   ```
+3. Suivre l'assistant pour choisir le domaine et le chemin.
 
-## Endpoints API
-- `GET /api/health`
-- `GET /api/version`
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/logout`
-- `GET /api/user/me`
-- `GET /api/wallet`
-- `GET /api/wallet/history`
-- `POST /api/wallet/credit`
-- `POST /api/wallet/debit`
+## Fonctionnement (Option B)
+- Nginx sert le frontend statique depuis `__INSTALL_DIR__/www`.
+- Nginx sert l'admin statique depuis `__INSTALL_DIR__/www-admin`.
+- `/api/` (et `/socket.io/`) sont reverse-proxy vers le service Node local.
 
-## Déploiement
-Le packaging YunoHost est disponible dans `casino-games-fun_ynh/`.
+## Smoke test
+Après installation, exécuter sur le serveur :
+```
+/usr/local/bin/ynh-app-scripts --app casino-games-fun --run smoke
+```
