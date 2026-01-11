@@ -25,6 +25,11 @@
 | `/logout` | POST | OK | Logout simulé. |
 | `/install` | GET | OK | Placeholder d'installation. |
 | `/about` | GET | OK | Disclaimer : jeu gratuit, crédits fictifs. |
+| `/lobby` | GET | OK | Page lobby modernisée. |
+| `/profile` | GET | OK | Profil joueur. |
+| `/wallet` | GET | OK | Solde et crédits. |
+| `/history` | GET | OK | Historique des crédits. |
+| `/admin` | GET | OK | Administration. |
 
 ## Endpoints API
 | Endpoint | Méthode | Statut actuel | Notes |

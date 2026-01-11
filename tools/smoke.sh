@@ -13,6 +13,11 @@ declare -A expected=(
   ["/api/wallet"]="401"
   ["/api/history"]="401"
   ["/api/bonus/daily"]="401"
+  ["/lobby"]="200"
+  ["/profile"]="200"
+  ["/wallet"]="200"
+  ["/history"]="200"
+  ["/admin"]="200"
 )
 
 for path in "${!expected[@]}"; do
