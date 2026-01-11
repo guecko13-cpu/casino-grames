@@ -62,3 +62,7 @@
 - [ ] `/login`, `/register`, `/install`, `/api/health` répondent en 200 via `tools/smoke.sh`.
 - [ ] `php -l` passe sur tous les fichiers PHP via `tools/lint_php.sh`.
 - [ ] Aucun marqueur de conflit via `tools/check_conflicts.sh`.
+
+## Exécution des smoke tests (serveur)
+- Commande : `./tools/smoke.sh https://votre-domaine.tld`
+- Par défaut, sans argument, `tools/smoke.sh` teste `http://localhost`.

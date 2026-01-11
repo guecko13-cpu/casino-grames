@@ -3,19 +3,19 @@ set -euo pipefail
 
 BASE_URL=${1:-http://localhost}
 
-paths=(
-  "/"
-  "/login"
-  "/register"
-  "/install"
-  "/api/health"
+declare -A expected=(
+  ["/"]="200"
+  ["/login"]="200"
+  ["/register"]="200"
+  ["/install"]="200"
+  ["/api/health"]="200"
 )
 
-for path in "${paths[@]}"; do
+for path in "${!expected[@]}"; do
   url="${BASE_URL}${path}"
-  status=$(curl -s -o /dev/null -w "%{http_code}" "$url")
-  if [[ "$status" != "200" ]]; then
-    echo "[FAIL] $url -> $status"
+  status=$(curl -s -o /dev/null -w "%{http_code}" -I "$url")
+  if [[ "$status" != "${expected[$path]}" ]]; then
+    echo "[FAIL] $url -> $status (expected ${expected[$path]})"
     exit 1
   fi
   echo "[OK] $url -> $status"
