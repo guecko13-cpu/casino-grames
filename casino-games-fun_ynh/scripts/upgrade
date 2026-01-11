@@ -1,0 +1,24 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+
+app=$YNH_APP_INSTANCE_NAME
+
+install_dir=$(ynh_app_setting_get --app="$app" --key=install_dir)
+
+ynh_script_progression --message="Mise à jour des sources..." --weight=5
+ynh_setup_source --dest_dir="$install_dir"
+
+ynh_script_progression --message="Mise à jour des dépendances Node.js..." --weight=10
+ynh_exec_as "$app" --env "PATH=$PATH_WITH_NODEJS:$PATH" --cwd "$install_dir" npm install --omit=dev
+
+ynh_script_progression --message="Mise à jour de Nginx..." --weight=5
+ynh_config_add_nginx
+
+ynh_script_progression --message="Mise à jour du service systemd..." --weight=5
+ynh_config_add_systemd
+
+yunohost service restart "$app"
+
+ynh_script_progression --message="Mise à jour terminée." --last

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Casino Games Fun</title>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin: 0; background: #0f172a; color: #f8fafc; }
+    header { padding: 24px; background: #111827; }
+    main { padding: 24px; max-width: 960px; margin: 0 auto; }
+    .card { background: #1f2937; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #22c55e; color: #052e16; font-weight: 600; }
+    .muted { color: #94a3b8; }
+    a { color: #38bdf8; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Casino Games Fun</h1>
+    <p class="muted">Monnaie fictive, sans crypto.</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>État du service</h2>
+      <p id="health">Chargement...</p>
+    </section>
+    <section class="card">
+      <h2>Fonctionnalités</h2>
+      <ul>
+        <li>Inscription / connexion via <code>/api/auth</code></li>
+        <li>Profil et solde fictif via <code>/api/user</code> et <code>/api/wallet</code></li>
+        <li>Socket.IO pour les mises à jour en temps réel</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Administration</h2>
+      <p>Accédez à l'espace admin: <a href="/admin">/admin</a></p>
+    </section>
+  </main>
+  <script>
+    fetch('/api/health')
+      .then((res) => res.json())
+      .then((data) => {
+        document.getElementById('health').textContent = `OK (${data.mongo})`;
+      })
+      .catch(() => {
+        document.getElementById('health').textContent = 'Indisponible';
+      });
+  </script>
+</body>
+</html>
