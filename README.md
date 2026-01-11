@@ -1,18 +1,28 @@
-# casino-grames
+# Casino Games Fun
 
-## DEV quickstart
-1. Installer PHP 8.4+.
-2. Lancer le serveur local :
+Version "argent fictif" de la plateforme casino.
+
+## Démarrage rapide
+1. Installer Node.js 20+ et MongoDB.
+2. Copier `.env.example` vers `.env` et ajuster les valeurs.
+3. Installer les dépendances puis lancer :
+   ```bash
+   npm install
+   npm run start
    ```
-   php -S 0.0.0.0:8000 -t public
-   ```
-3. Ouvrir `http://localhost:8000`.
+4. Ouvrir `http://localhost:3000` (frontend) ou `http://localhost:3000/admin`.
 
-## PROD build
-- Déployer derrière Nginx + PHP-FPM.
-- Exemple Nginx : `docs/nginx.conf`.
+## Endpoints API
+- `GET /api/health`
+- `GET /api/version`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `POST /api/auth/logout`
+- `GET /api/user/me`
+- `GET /api/wallet`
+- `GET /api/wallet/history`
+- `POST /api/wallet/credit`
+- `POST /api/wallet/debit`
 
-## Qualité
-- Lint PHP : `./tools/lint_php.sh` ou `./tools/lint.sh`.
-- Smoke tests : `./tools/smoke.sh https://votre-domaine.tld`.
-- Conflits : `./tools/check-conflicts.sh`.
+## Déploiement
+Le packaging YunoHost est disponible dans `casino-games-fun_ynh/`.

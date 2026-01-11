@@ -1,0 +1,13 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+ynh_script_progression --message="Restauration des fichiers..." --weight=5
+ynh_restore
+
+ynh_script_progression --message="Restauration de MongoDB..." --weight=5
+ynh_mongo_restore --db_user="$app" --db_name="$app"
+
+ynh_script_progression --message="Restauration terminée." --last

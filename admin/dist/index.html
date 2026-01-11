@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin - Casino Games Fun</title>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin: 0; background: #0b1120; color: #e2e8f0; }
+    header { padding: 24px; background: #111827; }
+    main { padding: 24px; max-width: 900px; margin: 0 auto; }
+    .card { background: #1e293b; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .muted { color: #94a3b8; }
+    code { color: #fda4af; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Administration</h1>
+    <p class="muted">Gestion des joueurs et surveillance.</p>
+  </header>
+  <main>
+    <section class="card">
+      <h2>Endpoints utiles</h2>
+      <ul>
+        <li><code>/api/health</code> : état du backend</li>
+        <li><code>/api/version</code> : version déployée</li>
+        <li><code>/api/wallet</code> : solde et transactions</li>
+      </ul>
+    </section>
+    <section class="card">
+      <h2>Prochaines étapes</h2>
+      <p class="muted">Brancher une interface admin complète via un build Vite dédié.</p>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,27 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+ynh_script_progression --message="Mise à jour des sources..." --weight=5
+ynh_setup_source --dest_dir="$install_dir"
+
+ensure_dirs
+
+ynh_script_progression --message="Mise à jour des dépendances Node.js..." --weight=10
+install_node_deps
+
+ynh_script_progression --message="Construction des interfaces..." --weight=10
+build_frontend
+build_admin
+
+ynh_script_progression --message="Mise à jour de Nginx..." --weight=5
+ynh_config_add_nginx
+
+ynh_script_progression --message="Mise à jour du service systemd..." --weight=5
+ynh_config_add_systemd
+
+yunohost service restart "$app"
+
+ynh_script_progression --message="Mise à jour terminée." --last
