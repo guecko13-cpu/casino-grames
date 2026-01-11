@@ -187,6 +187,37 @@ function get_recent_logs(int $lines = 12): array
     return array_slice($content, -$lines);
 }
 
+function parse_json_body(): array
+{
+    $raw = file_get_contents('php://input');
+    if ($raw === false || trim($raw) === '') {
+        return [];
+    }
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
+}
+
+function idempotency_response(string $key): ?array
+{
+    return $_SESSION['idempotency'][$key] ?? null;
+}
+
+function store_idempotency_response(string $key, array $response): void
+{
+    $_SESSION['idempotency'][$key] = $response;
+}
+
+function require_idempotency_key(): string
+{
+    $key = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? '';
+    $key = trim($key);
+    if ($key === '') {
+        respond_json(['error' => 'Idempotency-Key requis.'], 400);
+        exit;
+    }
+    return $key;
+}
+
 enforce_maintenance_mode($path);
 
 switch ($path) {
@@ -341,6 +372,19 @@ switch ($path) {
         $balance = $userId ? $ledger->getBalance($userId) : 0;
         respond_json(['user_id' => $userId, 'balance' => $balance]);
         break;
+    case '/api/credits/ledger':
+        if ($method !== 'GET') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $userId = require_auth();
+        $limit = (int) ($_GET['limit'] ?? 50);
+        $limit = max(1, min($limit, 100));
+        respond_json([
+            'user_id' => $userId,
+            'transactions' => $ledger->getHistory($userId, $limit),
+        ]);
+        break;
     case '/api/wallet':
         if ($method !== 'GET') {
             respond_json(['error' => 'Méthode non autorisée.'], 405);
@@ -385,6 +429,54 @@ switch ($path) {
         ]);
         break;
     default:
+        if (preg_match('#^/api/games/([a-z0-9_-]+)/play$#', $path, $matches)) {
+            if ($method !== 'POST') {
+                respond_json(['error' => 'Méthode non autorisée.'], 405);
+                break;
+            }
+            rate_limit('api_game_play', 30, 60);
+            $userId = require_auth();
+            $idempotencyKey = require_idempotency_key();
+            $cached = idempotency_response($idempotencyKey);
+            if ($cached !== null) {
+                respond_json($cached);
+                break;
+            }
+            $game = $matches[1];
+            $allowedGames = ['crash', 'mines', 'slots', 'roulette', 'blackjack'];
+            if (!in_array($game, $allowedGames, true)) {
+                respond_json(['error' => 'Jeu inconnu.'], 404);
+                break;
+            }
+            $payload = parse_json_body();
+            $bet = (int) ($payload['bet'] ?? 0);
+            $minBet = 5;
+            $maxBet = 500;
+            if ($bet < $minBet || $bet > $maxBet) {
+                respond_json(['error' => 'Mise invalide.', 'min' => $minBet, 'max' => $maxBet], 422);
+                break;
+            }
+            $balance = $ledger->getBalance($userId);
+            if ($balance < $bet) {
+                respond_json(['error' => 'Solde insuffisant.'], 422);
+                break;
+            }
+            $ledger->addTransaction($userId, 'game_bet', -$bet, ['game' => $game]);
+            $multiplier = random_int(0, 100) < 45 ? 0 : random_int(1, 4);
+            $payout = $bet * $multiplier;
+            if ($payout > 0) {
+                $ledger->addTransaction($userId, 'game_win', $payout, ['game' => $game, 'multiplier' => $multiplier]);
+            }
+            $response = [
+                'game' => $game,
+                'bet' => $bet,
+                'payout' => $payout,
+                'balance' => $ledger->getBalance($userId),
+            ];
+            store_idempotency_response($idempotencyKey, $response);
+            respond_json($response);
+            break;
+        }
         if (str_starts_with($path, '/api/')) {
             respond_json(['error' => 'Endpoint API inconnu.'], 404);
             break;
