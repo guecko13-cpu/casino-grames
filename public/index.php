@@ -100,6 +100,95 @@ function require_csrf(): void
     }
 }
 
+function is_maintenance_mode_enabled(): bool
+{
+    return file_exists(__DIR__ . '/../data/maintenance.flag');
+}
+
+function set_maintenance_mode(bool $enabled): void
+{
+    $flag = __DIR__ . '/../data/maintenance.flag';
+    if ($enabled) {
+        $directory = dirname($flag);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0775, true);
+        }
+        file_put_contents($flag, 'on');
+        return;
+    }
+    if (file_exists($flag)) {
+        unlink($flag);
+    }
+}
+
+function enforce_maintenance_mode(string $path): void
+{
+    if (!is_maintenance_mode_enabled()) {
+        return;
+    }
+    $allowed = ['/admin', '/login', '/logout', '/about', '/install', '/api/health'];
+    if (str_starts_with($path, '/assets/')) {
+        return;
+    }
+    if (in_array($path, $allowed, true)) {
+        return;
+    }
+    respond_html(
+        'Maintenance',
+        '<section class="card"><h1>Maintenance</h1><p class="muted">Le service est en maintenance. Merci de revenir plus tard.</p></section>',
+        503
+    );
+    exit;
+}
+
+function rate_limit(string $key, int $limit, int $windowSeconds): void
+{
+    $now = time();
+    $bucket = $_SESSION['rate_limit'][$key] ?? ['start' => $now, 'count' => 0];
+    if ($now - $bucket['start'] >= $windowSeconds) {
+        $bucket = ['start' => $now, 'count' => 0];
+    }
+    $bucket['count']++;
+    $_SESSION['rate_limit'][$key] = $bucket;
+    if ($bucket['count'] > $limit) {
+        respond_json(['error' => 'Trop de requêtes.'], 429);
+        exit;
+    }
+}
+
+function get_git_hash(): string
+{
+    $headPath = __DIR__ . '/../.git/HEAD';
+    if (!file_exists($headPath)) {
+        return 'unknown';
+    }
+    $head = trim((string) file_get_contents($headPath));
+    if (str_starts_with($head, 'ref:')) {
+        $ref = trim(substr($head, 4));
+        $refPath = __DIR__ . '/../.git/' . $ref;
+        if (file_exists($refPath)) {
+            return substr(trim((string) file_get_contents($refPath)), 0, 12);
+        }
+        return 'unknown';
+    }
+    return substr($head, 0, 12);
+}
+
+function get_recent_logs(int $lines = 12): array
+{
+    $logPath = __DIR__ . '/../data/app.log';
+    if (!file_exists($logPath)) {
+        return [];
+    }
+    $content = file($logPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if ($content === false) {
+        return [];
+    }
+    return array_slice($content, -$lines);
+}
+
+enforce_maintenance_mode($path);
+
 switch ($path) {
     case '/':
         respond_html(
@@ -160,13 +249,33 @@ switch ($path) {
         );
         break;
     case '/admin':
+        if ($method === 'POST') {
+            require_csrf();
+            $toggle = ($_POST['maintenance'] ?? '') === 'on';
+            set_maintenance_mode($toggle);
+        }
+        $token = csrf_token();
+        $maintenance = is_maintenance_mode_enabled();
+        $version = get_git_hash();
+        $logs = get_recent_logs(8);
+        $logItems = '';
+        foreach ($logs as $entry) {
+            $logItems .= '<div class="list-item"><span class="muted">' . htmlspecialchars($entry, ENT_QUOTES) . '</span></div>';
+        }
+        if ($logItems === '') {
+            $logItems = '<div class="list-item"><span class="muted">Aucun log récent.</span></div>';
+        }
         respond_html(
             'Admin',
             '<section class="grid cols-2">
-              <article class="card"><h3>Maintenance</h3><p class="muted">Etat du service et logs.</p><div class="status success">Service OK</div></article>
-              <article class="card"><h3>Actions rapides</h3><p class="muted">Réinitialiser les crédits d\'un compte.</p><input class="input" placeholder="ID utilisateur"><button class="button secondary" type="button">Réinitialiser</button></article>
+              <article class="card"><h3>Maintenance</h3><p class="muted">Etat du service et logs.</p><div class="status ' . ($maintenance ? 'error' : 'success') . '">' . ($maintenance ? 'Maintenance activée' : 'Service OK') . '</div><form method="post" class="list" style="margin-top: 12px;"><input type="hidden" name="csrf_token" value="' . htmlspecialchars($token, ENT_QUOTES) . '"><label class="list-item"><span>Mode maintenance</span><input type="checkbox" name="maintenance" value="on" ' . ($maintenance ? 'checked' : '') . '></label><button class="button secondary" type="submit">Enregistrer</button></form></article>
+              <article class="card"><h3>Actions rapides</h3><p class="muted">Réinitialiser les crédits d\'un compte.</p><input class="input" placeholder="ID utilisateur"><button class="button secondary" type="button">Réinitialiser</button><p class="muted">Version: ' . htmlspecialchars($version, ENT_QUOTES) . '</p></article>
             </section>
-            <section class="modal"><h3>Message système</h3><p class="muted">Les actions admin sont journalisées.</p></section>'
+            <section class="grid cols-2">
+              <article class="card"><h3>Healthchecks</h3><p class="muted">Endpoints disponibles.</p><div class="list"><div class="list-item"><span>/api/health</span><span class="badge">200</span></div><div class="list-item"><span>/api/wallet</span><span class="badge">401</span></div></div></article>
+              <article class="card"><h3>Smoke tests</h3><p class="muted">Exécuter sur serveur :</p><div class="list"><div class="list-item"><span>./tools/smoke.sh https://votre-domaine.tld</span></div></div></article>
+            </section>
+            <section class="modal"><h3>Logs récents</h3><div class="list">' . $logItems . '</div></section>'
         );
         break;
     case '/login':
@@ -220,6 +329,7 @@ switch ($path) {
             respond_json(['error' => 'Méthode non autorisée.'], 405);
             break;
         }
+        rate_limit('api_wallet', 30, 60);
         $userId = require_auth();
         respond_json([
             'user_id' => $userId,
@@ -232,6 +342,7 @@ switch ($path) {
             respond_json(['error' => 'Méthode non autorisée.'], 405);
             break;
         }
+        rate_limit('api_history', 30, 60);
         $userId = require_auth();
         respond_json([
             'user_id' => $userId,
@@ -243,6 +354,7 @@ switch ($path) {
             respond_json(['error' => 'Méthode non autorisée.'], 405);
             break;
         }
+        rate_limit('api_bonus_daily', 5, 60);
         $userId = require_auth();
         $today = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         if ($ledger->hasDailyBonus($userId, $today)) {
