@@ -10,11 +10,18 @@ declare -A expected=(
   ["/install"]="200"
   ["/about"]="200"
   ["/api/health"]="200"
+  ["/api/wallet"]="401"
+  ["/api/history"]="401"
+  ["/api/bonus/daily"]="401"
 )
 
 for path in "${!expected[@]}"; do
   url="${BASE_URL}${path}"
-  status=$(curl -s -o /dev/null -w "%{http_code}" -I "$url")
+  method="GET"
+  if [[ "$path" == "/api/bonus/daily" ]]; then
+    method="POST"
+  fi
+  status=$(curl -s -o /dev/null -w "%{http_code}" -I -X "$method" "$url")
   if [[ "$status" != "${expected[$path]}" ]]; then
     echo "[FAIL] $url -> $status (expected ${expected[$path]})"
     exit 1

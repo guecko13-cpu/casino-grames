@@ -30,6 +30,9 @@
 | Endpoint | Méthode | Statut actuel | Notes |
 | --- | --- | --- | --- |
 | `/api/health` | GET | OK | Healthcheck JSON. |
+| `/api/wallet` | GET | 401 | Solde et dernières transactions (auth requise). |
+| `/api/history` | GET | 401 | Historique complet (auth requise). |
+| `/api/bonus/daily` | POST | 401 | Bonus quotidien (auth requise). |
 | `/api/*` | GET/POST | 404 JSON | Réponse JSON uniforme pour endpoints inconnus. |
 
 ## Routing & rewrites

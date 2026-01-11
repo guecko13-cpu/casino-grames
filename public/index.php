@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 session_start();
 
+require_once __DIR__ . '/../src/ledger.php';
+
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('Referrer-Policy: strict-origin-when-cross-origin');
+
+$ledger = new Ledger(__DIR__ . '/../data/credits.sqlite', __DIR__ . '/../data/app.log');
 
 function respond_html(string $title, string $body, int $status = 200): void
 {
@@ -50,6 +54,21 @@ function respond_json(array $payload, int $status = 200): void
     echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
 }
 
+function current_user_id(): ?int
+{
+    return isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+}
+
+function require_auth(): int
+{
+    $userId = current_user_id();
+    if ($userId === null) {
+        respond_json(['error' => 'Authentification requise.'], 401);
+        exit;
+    }
+    return $userId;
+}
+
 function csrf_token(): string
 {
     if (!isset($_SESSION['csrf_token'])) {
@@ -77,6 +96,7 @@ switch ($path) {
     case '/login':
         if ($method === 'POST') {
             require_csrf();
+            $_SESSION['user_id'] = 1;
             respond_html('Connexion', '<h1>Connexion</h1><p class="muted">Connexion simulée.</p><p><a href="/">Retour</a></p>');
             break;
         }
@@ -118,6 +138,46 @@ switch ($path) {
         break;
     case '/api/health':
         respond_json(['status' => 'ok', 'time' => date(DATE_ATOM)]);
+        break;
+    case '/api/wallet':
+        if ($method !== 'GET') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $userId = require_auth();
+        respond_json([
+            'user_id' => $userId,
+            'balance' => $ledger->getBalance($userId),
+            'last_transactions' => $ledger->getLastTransactions($userId, 5),
+        ]);
+        break;
+    case '/api/history':
+        if ($method !== 'GET') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $userId = require_auth();
+        respond_json([
+            'user_id' => $userId,
+            'transactions' => $ledger->getHistory($userId, 50),
+        ]);
+        break;
+    case '/api/bonus/daily':
+        if ($method !== 'POST') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $userId = require_auth();
+        $today = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        if ($ledger->hasDailyBonus($userId, $today)) {
+            respond_json(['error' => 'Bonus déjà reçu.'], 429);
+            break;
+        }
+        $transaction = $ledger->addTransaction($userId, 'bonus_daily', 100, ['source' => 'daily_bonus']);
+        respond_json([
+            'transaction' => $transaction,
+            'balance' => $ledger->getBalance($userId),
+        ]);
         break;
     default:
         if (str_starts_with($path, '/api/')) {
