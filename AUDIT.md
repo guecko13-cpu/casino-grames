@@ -15,8 +15,7 @@
     ├── lint_php.sh
     └── smoke.sh
 ```
-
-## Routes et pages
+## Pages publiques
 | Route | Méthode | Statut actuel | Notes |
 | --- | --- | --- | --- |
 | `/` | GET | OK | Page d'accueil (front controller). |
@@ -25,18 +24,25 @@
 | `/logout` | POST | OK | Logout simulé. |
 | `/install` | GET | OK | Placeholder d'installation. |
 
-## API Endpoints
+## Endpoints API
 | Endpoint | Méthode | Statut actuel | Notes |
 | --- | --- | --- | --- |
 | `/api/health` | GET | OK | Healthcheck JSON. |
 | `/api/*` | GET/POST | 404 JSON | Réponse JSON uniforme pour endpoints inconnus. |
 
-## Points cassés / risques 404
-- Aucun routeur PHP/NGINX existant dans l'ancien dépôt. Toutes les routes requises pouvaient tomber en 404 si le front controller n'était pas installé.
-- Pas de config Nginx documentée pour `try_files` vers `index.php`.
-- Pas de service worker détecté.
+## Routing & rewrites
+- **Nginx** : exemple de `try_files $uri /index.php?$query_string` documenté dans `docs/nginx.conf`.
+- **Front controller** : le routing est centralisé dans `public/index.php` via un `switch` sur le `REQUEST_URI`.
 
-## Plan de PRs proposées
+## État actuel des problèmes
+- **Avant stabilisation** : 404 observables sur `/login`, `/register`, `/api/*`, `/install` si Nginx ne renvoie pas vers `index.php` (absence de front controller).
+- **Après stabilisation** : routes critiques servies par `public/index.php`, 404 standard pour endpoints `/api/*` inconnus.
+
+## Service Worker / PWA
+- Aucun Service Worker détecté à ce stade.
+- Risque potentiel : si un SW est ajouté plus tard, il pourrait casser les redirects ou le caching des routes d'authentification.
+
+## Plan de PRs proposées (ordre recommandé)
 1. **PR A - Stabilisation du routing**
    - Ajouter `public/index.php` (front controller) + routes critiques.
    - Ajouter exemple `docs/nginx.conf` pour `try_files`.
@@ -51,3 +57,8 @@
    - Maintenance/logs/healthchecks/settings.
 5. **PR E - Docs & CI**
    - README d'installation, scripts CI, validations.
+
+## Checklists de validation
+- [ ] `/login`, `/register`, `/install`, `/api/health` répondent en 200 via `tools/smoke.sh`.
+- [ ] `php -l` passe sur tous les fichiers PHP via `tools/lint_php.sh`.
+- [ ] Aucun marqueur de conflit via `tools/check_conflicts.sh`.
