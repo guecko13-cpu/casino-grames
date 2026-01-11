@@ -1,0 +1,14 @@
+#!/bin/bash
+set -eu
+
+source /usr/share/yunohost/helpers
+source ./scripts/_common.sh
+
+ynh_script_progression --message="Sauvegarde des fichiers..." --weight=5
+ynh_backup --src_path="$install_dir"
+ynh_backup --src_path="$data_dir"
+
+ynh_script_progression --message="Sauvegarde de MongoDB..." --weight=5
+ynh_mongo_dump --db_user="$app" --db_name="$app"
+
+ynh_script_progression --message="Sauvegarde terminée." --last
