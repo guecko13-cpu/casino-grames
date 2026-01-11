@@ -8,6 +8,7 @@ declare -A expected=(
   ["/login"]="200"
   ["/register"]="200"
   ["/install"]="200"
+  ["/about"]="200"
   ["/api/health"]="200"
 )
 

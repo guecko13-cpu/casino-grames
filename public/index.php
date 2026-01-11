@@ -71,7 +71,7 @@ switch ($path) {
     case '/':
         respond_html(
             'Gaming Star',
-            '<h1>Gaming Star</h1><p class="muted">Bienvenue sur le casino fictif.</p><p><a href="/login">Connexion</a> · <a href="/register">Inscription</a></p>'
+            '<h1>Gaming Star</h1><p class="muted">Bienvenue sur le casino fictif.</p><p><a href="/login">Connexion</a> · <a href="/register">Inscription</a> · <a href="/about">À propos</a></p>'
         );
         break;
     case '/login':
@@ -109,6 +109,12 @@ switch ($path) {
         break;
     case '/install':
         respond_html('Installation', '<h1>Installation</h1><p class="muted">Assistant d\'installation à définir.</p>');
+        break;
+    case '/about':
+        respond_html(
+            'À propos',
+            '<h1>À propos</h1><p class="muted">Gaming Star est un jeu gratuit. La monnaie interne est fictive (crédits) et ne permet aucun retrait réel.</p><p class="muted">Aucun paiement réel n\'est disponible, et aucune valeur monétaire n\'est associée aux crédits.</p><p><a href="/">Accueil</a></p>'
+        );
         break;
     case '/api/health':
         respond_json(['status' => 'ok', 'time' => date(DATE_ATOM)]);

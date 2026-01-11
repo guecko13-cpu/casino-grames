@@ -24,6 +24,7 @@
 | `/register` | GET/POST | OK | Formulaire + CSRF simulé. |
 | `/logout` | POST | OK | Logout simulé. |
 | `/install` | GET | OK | Placeholder d'installation. |
+| `/about` | GET | OK | Disclaimer : jeu gratuit, crédits fictifs. |
 
 ## Endpoints API
 | Endpoint | Méthode | Statut actuel | Notes |
@@ -48,8 +49,8 @@
    - Ajouter `public/index.php` (front controller) + routes critiques.
    - Ajouter exemple `docs/nginx.conf` pour `try_files`.
    - Ajouter scripts `tools/*` (lint, smoke, conflits).
-2. **PR B - Dé-crypto + ledger**
-   - Remplacer tous les termes crypto par crédits.
+2. **PR B - Monnaie fictive + ledger**
+   - Uniformiser le vocabulaire autour des crédits/coins fictifs.
    - Ajouter ledger (transactions) + calcul de solde.
    - Exposer API `/api/ledger`, `/api/balance`.
 3. **PR C - UI mobile-first**
