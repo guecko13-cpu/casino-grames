@@ -324,6 +324,23 @@ switch ($path) {
     case '/api/health':
         respond_json(['status' => 'ok', 'time' => date(DATE_ATOM)]);
         break;
+    case '/api/auth/login':
+        if ($method !== 'POST') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $_SESSION['user_id'] = 1;
+        respond_json(['status' => 'ok', 'user_id' => 1]);
+        break;
+    case '/api/credits/balance':
+        if ($method !== 'GET') {
+            respond_json(['error' => 'Méthode non autorisée.'], 405);
+            break;
+        }
+        $userId = current_user_id();
+        $balance = $userId ? $ledger->getBalance($userId) : 0;
+        respond_json(['user_id' => $userId, 'balance' => $balance]);
+        break;
     case '/api/wallet':
         if ($method !== 'GET') {
             respond_json(['error' => 'Méthode non autorisée.'], 405);
