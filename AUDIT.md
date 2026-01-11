@@ -15,6 +15,7 @@
     ├── lint_php.sh
     └── smoke.sh
 ```
+
 ## Pages publiques
 | Route | Méthode | Statut actuel | Notes |
 | --- | --- | --- | --- |
